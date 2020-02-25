@@ -3,8 +3,7 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
     <style>
-        #stateToggle {position: absolute; top: 525px;}
-        #congressToggle {position: absolute; top: 550px;}
+        #toggle {position: absolute; top: 525px;}
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
         #map { height: 500px; }
         .info {
@@ -36,8 +35,7 @@
 </head>
 <body>
 <div id = "map"></div>
-<div id = "stateToggle"><button onclick="toggleStates();">toggle states</button></div>
-<div id = "congressToggle"><button onclick="toggleCongress();">toggle congress</button></div>
+<div id = "toggle"><button onclick="toggle();">toggle</button></div>
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
 <script type="text/javascript" src="label/src/Label.js"></script>
@@ -56,10 +54,11 @@
 
     /* Create US map using leaflet api and us-states.js data of coordinates */
 
+    var statesToggle = 1;
+    var congressToggle = 0;
+
     var statesJson = L.geoJson(statesData).addTo(map);
     var congressJson = L.geoJson(congressData).addTo(map);
-
-    window.toggle = false;
 
     /* Get color of state based on their population density, darker is more dense */
     function getColor(d) {
@@ -70,6 +69,17 @@
                         d > 50   ? '#FD8D3C' :
                             d > 20   ? '#FEB24C' :
                                 d > 10   ? '#FED976' :
+                                    '#FFEDA0';
+    }
+
+    function getColor2(c) {
+        return c > 75000 ? '#800026' :
+            c > 50000  ? '#BD0026' :
+                c > 25000  ? '#E31A1C' :
+                    c > 20000  ? '#FC4E2A' :
+                        c > 10000   ? '#FD8D3C' :
+                            c > 5000   ? '#FEB24C' :
+                                c > 500   ? '#FED976' :
                                     '#FFEDA0';
     }
 
@@ -89,17 +99,20 @@
             fillOpacity: 0.5
         };
     }
-    function style2() {
+    function style2(feature) {
         return {
+            fillColor: getColor2(feature.properties.CENSUSAREA),
             weight: 2,
             opacity: 0.5,
             color: 'white',
-            dashArray: '3'
+            dashArray: '3',
+            fillOpacity: 0.5
         };
     }
 
     /* Add the style to the map */
-    var statesStyle = L.geoJson(statesData, {style: style}).addTo(map);
+
+    statesJson = L.geoJson(statesData, {style: style}).addTo(map);
     var congressStyle = L.geoJson(congressData, {style: style2}).addTo(map);
 
     /* Give state border on highlight*/
@@ -121,8 +134,12 @@
 
     /* Take away highlight on mouseout */
     function resetHighlight(e) {
-        statesJson.resetStyle(e.target);
-        congressJson.resetStyle(e.target);
+        if(statesToggle){
+            statesJson.resetStyle(e.target);
+        }
+        if(congressToggle) {
+            congressStyle.resetStyle(e.target);
+        }
         info.update();
     }
 
@@ -137,7 +154,7 @@
             mouseover: highlightFeature,
             mouseout: resetHighlight,
             click: zoomToFeature
-        });
+         });
     }
 
     /* Add on each feature function to map */
@@ -146,10 +163,14 @@
         onEachFeature: onEachFeature
     }).addTo(map);
 
-    congressJson = L.geoJson(congressData, {
+    var congressFunction = L.geoJson(congressData, {
         style: style2,
         onEachFeature: onEachFeature
     }).addTo(map);
+
+    map.removeLayer(congressJson);
+    map.removeLayer(congressStyle);
+    map.removeLayer(congressFunction);
 
     var info = L.control();
 
@@ -161,9 +182,16 @@
 
     /* Method that we will use to update the control based on feature properties passed */
     info.update = function (props) {
-        this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-            : 'Hover over a state');
+        if(statesToggle){
+            this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+                : 'Hover over a state');
+        }
+        if(congressToggle){
+            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                : 'Hover over a state');
+        }
     };
 
     info.addTo(map);
@@ -174,8 +202,15 @@
     legend.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+            grades,
             labels = [];
+
+        if(statesToggle){
+            grades = [0, 10, 20, 50, 100, 200, 500, 1000];
+        }
+        if(congressToggle){
+            grades = [0, 5000, 10000, 15000, 25000, 50000, 75000, 100000];
+        }
 
         // loop through our density intervals and generate a label with a colored square for each interval
         for (var i = 0; i < grades.length; i++) {
@@ -239,25 +274,24 @@
         map.openPopup(popup);
     }
 
-    function toggleStates() {
-        if(!toggle) {
+    function toggle() {
+        if(statesToggle) {
             map.removeLayer(statesJson);
-            map.removeLayer(statesStyle);
-        } else {
-            map.addLayer(statesJson);
-            map.addLayer(statesStyle);
-        }
-        toggle = !toggle;
-    }
-    function toggleCongress() {
-        if(!toggle) {
-            map.removeLayer(congressJson);
-            map.removeLayer(congressStyle);
-        } else {
+            statesToggle = 0;
             map.addLayer(congressJson);
             map.addLayer(congressStyle);
+            map.addLayer(congressFunction);
+            congressToggle = 1;
+            map.invalidateSize();
+        } else {
+            map.removeLayer(congressJson);
+            map.removeLayer(congressStyle);
+            map.removeLayer(congressFunction);
+            congressToggle = 0;
+            map.addLayer(statesJson);
+            statesToggle = 1;
+            map.invalidateSize();
         }
-        toggle = !toggle;
     }
 </script>
 </body>
