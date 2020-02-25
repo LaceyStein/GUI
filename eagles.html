@@ -3,7 +3,11 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
     <style>
-        #toggle {position: absolute; top: 525px;}
+        .dropdown {
+            position: absolute; top: 500px; left: 100px;
+            display: inline-block;
+        }
+        #affiliation {position: absolute; top: 550px;}
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
         #map { height: 500px; }
         .info {
@@ -36,10 +40,22 @@
 <body>
 <div id = "map"></div>
 <div id = "toggle"><button onclick="toggle();">toggle</button></div>
+
+<div class="dropdown">
+    <select id="data" onchange="changeData()">
+        <option value="0" >State</option>
+        <option value="1">County</option>
+        <option value="2" >Congress</option>
+    </select>
+</div>
+
+<div id = "affiliation"><button onclick="toggle();">affiliation</button></div>
 <script type="text/javascript" src="us-states.js"></script>
+<script type="text/javascript" src="counties.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
 <script type="text/javascript" src="label/src/Label.js"></script>
 <script>
+    /* Create US map using leaflet api and us-states.js data of coordinates */
     var map = L.map('map').setView([37.8, -96], 4);
 
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -52,13 +68,22 @@
         zoomOffset: -1
     }).addTo(map);
 
-    /* Create US map using leaflet api and us-states.js data of coordinates */
+    console.log("test");
 
+    /* Create layer groups for state, county, and congress*/
+    var congressLayers = L.layerGroup().addTo(map);
+    var statesLayers = L.layerGroup().addTo(map);
+    var countyLayers = L.layerGroup().addTo(map);
+
+    /* Set state on at first */
     var statesToggle = 1;
     var congressToggle = 0;
+    var countyToggle = 0;
 
-    var statesJson = L.geoJson(statesData).addTo(map);
-    var congressJson = L.geoJson(congressData).addTo(map);
+    /* Add data to respective layer group */
+    var statesJson = L.geoJson(statesData).addTo(statesLayers);
+    var congressJson = L.geoJson(congressData).addTo(congressLayers);
+    var countyJson = L.geoJson(countyData).addTo(countyLayers);
 
     /* Get color of state based on their population density, darker is more dense */
     function getColor(d) {
@@ -83,9 +108,15 @@
                                     '#FFEDA0';
     }
 
-    function getName(feature) {
-        var props = feature.properties;
-        return props.name;
+    function getColor3(a) {
+        return a > 20000 ? '#800026' :
+            a > 10000  ? '#BD0026' :
+                a > 5000  ? '#E31A1C' :
+                    a > 4000  ? '#FC4E2A' :
+                        a > 3000   ? '#FD8D3C' :
+                            a > 2000   ? '#FEB24C' :
+                                a > 1000   ? '#FED976' :
+                                    '#FFEDA0';
     }
 
     /* Function to fill based on getColor */
@@ -109,11 +140,22 @@
             fillOpacity: 0.5
         };
     }
+    function style3(feature) {
+        return {
+            fillColor: getColor3(feature.properties.CENSUSAREA),
+            weight: 2,
+            opacity: 0.5,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.5
+        };
+    }
 
     /* Add the style to the map */
 
-    statesJson = L.geoJson(statesData, {style: style}).addTo(map);
-    var congressStyle = L.geoJson(congressData, {style: style2}).addTo(map);
+    statesJson = L.geoJson(statesData, {style: style}).addTo(statesLayers);
+    congressJson = L.geoJson(congressData, {style: style2}).addTo(congressLayers);
+    countyJson = L.geoJson(countyData, {style: style3}).addTo(countyLayers);
 
     /* Give state border on highlight*/
     function highlightFeature(e) {
@@ -138,7 +180,10 @@
             statesJson.resetStyle(e.target);
         }
         if(congressToggle) {
-            congressStyle.resetStyle(e.target);
+            congressJson.resetStyle(e.target);
+        }
+        if(countyToggle) {
+            countyJson.resetStyle(e.target);
         }
         info.update();
     }
@@ -161,16 +206,20 @@
     statesJson = L.geoJson(statesData, {
         style: style,
         onEachFeature: onEachFeature
-    }).addTo(map);
+    }).addTo(statesLayers);
 
-    var congressFunction = L.geoJson(congressData, {
+    congressJson = L.geoJson(congressData, {
         style: style2,
         onEachFeature: onEachFeature
-    }).addTo(map);
+    }).addTo(congressLayers);
 
-    map.removeLayer(congressJson);
-    map.removeLayer(congressStyle);
-    map.removeLayer(congressFunction);
+    countyJson = L.geoJson(countyData, {
+        style: style3,
+        onEachFeature: onEachFeature
+    }).addTo(countyLayers);
+
+    map.removeLayer(congressLayers);
+    map.removeLayer(countyLayers);
 
     var info = L.control();
 
@@ -187,7 +236,7 @@
                 '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
                 : 'Hover over a state');
         }
-        if(congressToggle){
+        if(congressToggle || countyToggle){
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
                 : 'Hover over a state');
@@ -227,14 +276,20 @@
     //
 
     /* Function for highlighting a state with their party affiliation*/
-    // L.geoJSON(states, {
-    //     style: function(feature) {
-    //         switch (feature.properties.party) {
-    //             case 'Republican': return {color: "#ff0000"};
-    //             case 'Democrat':   return {color: "#0000ff"};
-    //         }
-    //     }
-    // }).addTo(map);
+    function affiliation() {
+        L.geoJSON(statesData, {
+            style: function (feature) {
+                switch (feature.properties.party) {
+                    case 'Republican':
+                        return {color: "#ff0000"};
+                    case 'Democrat':
+                        return {color: "#0000ff"};
+                    default:
+                        break;
+                }
+            }
+        }).addTo(map);
+    }
 
     //
 
@@ -276,21 +331,51 @@
 
     function toggle() {
         if(statesToggle) {
-            map.removeLayer(statesJson);
+            map.removeLayer(statesLayers);
             statesToggle = 0;
-            map.addLayer(congressJson);
-            map.addLayer(congressStyle);
-            map.addLayer(congressFunction);
-            congressToggle = 1;
-            map.invalidateSize();
+            map.addLayer(countyLayers);
+            countyToggle = 1;
         } else {
-            map.removeLayer(congressJson);
-            map.removeLayer(congressStyle);
-            map.removeLayer(congressFunction);
-            congressToggle = 0;
-            map.addLayer(statesJson);
+            map.removeLayer(countyLayers);
+            countyToggle = 0;
+            map.addLayer(statesLayers);
             statesToggle = 1;
-            map.invalidateSize();
+        }
+    }
+
+    function changeData() {
+        var eID = document.getElementById("data");
+        var dataTxt = eID.options[eID.selectedIndex].text;
+
+        console.log(dataTxt);
+
+        switch(dataTxt){
+            case 'State':
+                map.removeLayer(countyLayers);
+                countyToggle = 0;
+                map.removeLayer(congressLayers);
+                congressToggle = 0;
+                map.addLayer(statesLayers);
+                statesToggle = 1;
+                break;
+            case 'County':
+                map.removeLayer(statesLayers);
+                statesToggle = 0;
+                map.removeLayer(congressLayers);
+                congressToggle = 0;
+                map.addLayer(countyLayers);
+                countyToggle = 1;
+                break;
+            case 'Congress':
+                map.removeLayer(statesLayers);
+                statesToggle = 0;
+                map.removeLayer(countyLayers);
+                countyToggle = 0;
+                map.addLayer(congressLayers);
+                congressToggle = 1;
+                break;
+            default:
+                break;
         }
     }
 </script>
