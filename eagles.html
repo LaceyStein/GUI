@@ -49,8 +49,10 @@
         zoomOffset: -1
     }).addTo(map);
 
+    /* Create US map using leaflet api and us-states.js data of coordinates */
     var geojson = L.geoJson(statesData).addTo(map);
 
+    /* Get color of state based on their population density, darker is more dense */
     function getColor(d) {
         return d > 1000 ? '#800026' :
             d > 500  ? '#BD0026' :
@@ -62,6 +64,7 @@
                                     '#FFEDA0';
     }
 
+    /* Function to fill based on getColor */
     function style(feature) {
         return {
             fillColor: getColor(feature.properties.density),
@@ -73,8 +76,10 @@
         };
     }
 
+    /* Add the style to the map */
     L.geoJson(statesData, {style: style}).addTo(map);
 
+    /* Give state border on highlight*/
     function highlightFeature(e) {
         var layer = e.target;
 
@@ -90,13 +95,19 @@
         }
         info.update(layer.feature.properties);
     }
+
+    /* Take away highlight on mouseout */
     function resetHighlight(e) {
         geojson.resetStyle(e.target);
         info.update();
     }
+
+    /* Zoom feature */
     function zoomToFeature(e) {
         map.fitBounds(e.target.getBounds());
     }
+
+    /* Highlight on mouseover, un-highlight on mouseout, zoom on click */
     function onEachFeature(feature, layer) {
         layer.on({
             mouseover: highlightFeature,
@@ -105,6 +116,7 @@
         });
     }
 
+    /* Add on each feature function to map */
     geojson = L.geoJson(statesData, {
         style: style,
         onEachFeature: onEachFeature
@@ -118,7 +130,7 @@
         return this._div;
     };
 
-    // method that we will use to update the control based on feature properties passed
+    /* Method that we will use to update the control based on feature properties passed */
     info.update = function (props) {
         this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
             '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
@@ -129,6 +141,7 @@
 
     var legend = L.control({position: 'bottomright'});
 
+    /* We make our control based on the population density and add labels for it */
     legend.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'info legend'),
@@ -149,6 +162,7 @@
 
     //
 
+    /* Function for highlighting a state with their party affiliation*/
     L.geoJSON(states, {
         style: function(feature) {
             switch (feature.properties.party) {
@@ -161,29 +175,22 @@
     //
 
 
-    var circleLocation = new L.LatLng(51.508, -0.11),
-        circleOptions = {color: '#f03', opacity: 0.7},
-        circle = new L.Circle(circleLocation, 500, circleOptions);
-
-    circle.bindPopup("I am a circle.");
-    map.addLayer(circle);
-
-
-    var p1 = new L.LatLng(51.509, -0.08),
-        p2 = new L.LatLng(51.503, -0.06),
-        p3 = new L.LatLng(51.51, -0.047),
+    /* Add a polygon to the map */
+    var p1 = new L.LatLng(34, -126),
+        p2 = new L.LatLng(40, -125),
+        p3 = new L.LatLng(36, -124),
         polygonPoints = [p1, p2, p3],
         polygon = new L.Polygon(polygonPoints);
 
-    polygon.bindPopup("I am a polygon.");
     map.addLayer(polygon);
 
     map.on('click', onMapClick);
 
-    // var popup = new L.Popup();
+    var popup = new L.Popup();
 
+    /* On map click at a marker and prompt for label and display where you clicked */
     function onMapClick(e) {
-        // var latlngStr = '(' + e.latlng.lat.toFixed(3) + ', ' + e.latlng.lng.toFixed(3) + ')';
+        var latlngStr = '(' + e.latlng.lat.toFixed(3) + ', ' + e.latlng.lng.toFixed(3) + ')';
 
         var markerLocation = new L.LatLng(e.latlng.lat, e.latlng.lng),
             marker = new L.Marker(markerLocation);
@@ -198,11 +205,10 @@
             });
 
 
-        // popup.setLatLng(e.latlng);
-        // popup.setContent("You clicked the map at " + latlngStr);
-        // map.openPopup(popup);
+        popup.setLatLng(e.latlng);
+        popup.setContent("You clicked the map at " + latlngStr);
+        map.openPopup(popup);
     }
-
 </script>
 </body>
 </html>
