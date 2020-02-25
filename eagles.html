@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
     <style>
+        #stateToggle {position: absolute; top: 525px;}
+        #congressToggle {position: absolute; top: 550px;}
         #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
         #map { height: 500px; }
         .info {
@@ -34,6 +36,8 @@
 </head>
 <body>
 <div id = "map"></div>
+<div id = "stateToggle"><button onclick="toggleStates();">toggle states</button></div>
+<div id = "congressToggle"><button onclick="toggleCongress();">toggle congress</button></div>
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
 <script type="text/javascript" src="label/src/Label.js"></script>
@@ -51,8 +55,11 @@
     }).addTo(map);
 
     /* Create US map using leaflet api and us-states.js data of coordinates */
+
     var statesJson = L.geoJson(statesData).addTo(map);
     var congressJson = L.geoJson(congressData).addTo(map);
+
+    window.toggle = false;
 
     /* Get color of state based on their population density, darker is more dense */
     function getColor(d) {
@@ -92,8 +99,8 @@
     }
 
     /* Add the style to the map */
-    L.geoJson(statesData, {style: style}).addTo(map);
-    L.geoJson(congressData, {style: style2}).addTo(map);
+    var statesStyle = L.geoJson(statesData, {style: style}).addTo(map);
+    var congressStyle = L.geoJson(congressData, {style: style2}).addTo(map);
 
     /* Give state border on highlight*/
     function highlightFeature(e) {
@@ -230,6 +237,27 @@
         popup.setLatLng(e.latlng);
         popup.setContent("You clicked the map at " + latlngStr);
         map.openPopup(popup);
+    }
+
+    function toggleStates() {
+        if(!toggle) {
+            map.removeLayer(statesJson);
+            map.removeLayer(statesStyle);
+        } else {
+            map.addLayer(statesJson);
+            map.addLayer(statesStyle);
+        }
+        toggle = !toggle;
+    }
+    function toggleCongress() {
+        if(!toggle) {
+            map.removeLayer(congressJson);
+            map.removeLayer(congressStyle);
+        } else {
+            map.addLayer(congressJson);
+            map.addLayer(congressStyle);
+        }
+        toggle = !toggle;
     }
 </script>
 </body>
