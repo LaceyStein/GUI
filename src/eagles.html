@@ -2,44 +2,11 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
-    <style>
-        .dropdown {
-            position: absolute; top: 500px; left: 100px;
-            display: inline-block;
-        }
-        #affiliation {position: absolute; top: 550px;}
-        #map {position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
-        #map { height: 500px; }
-        .info {
-            padding: 6px 8px;
-            font: 14px/16px Arial, Helvetica, sans-serif;
-            background: white;
-            background: rgba(255,255,255,0.8);
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            border-radius: 5px;
-        }
-        .info h4 {
-            margin: 0 0 5px;
-            color: #777;
-        }
-
-        .legend {
-            line-height: 18px;
-            color: #555;
-        }
-        .legend i {
-            width: 18px;
-            height: 18px;
-            float: left;
-            margin-right: 8px;
-            opacity: 0.7;
-        }
-    </style>
+    <link rel="stylesheet" href="eagles.css">
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
 </head>
 <body>
 <div id = "map"></div>
-<div id = "toggle"><button onclick="toggle();">toggle</button></div>
 
 <div class="dropdown">
     <select id="data" onchange="changeData()">
@@ -49,11 +16,18 @@
     </select>
 </div>
 
-<div id = "affiliation"><button onclick="toggle();">affiliation</button></div>
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="counties.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
+
 <script type="text/javascript" src="label/src/Label.js"></script>
+
+<script type="text/javascript" src="affiliation.js"></script>
+<script type="text/javascript" src="marker.js"></script>
+
+/* TODO: Make toggles actually work. Can turn them on but not off... */
+<div id = "label"><button onclick="addMarker();">toggle marker mode</button></div>
+<div id = "affiliation"><button onclick="affiliation();">toggle affiliation highlight</button></div>
 <script>
     /* Create US map using leaflet api and us-states.js data of coordinates */
     var map = L.map('map').setView([37.8, -96], 4);
@@ -67,8 +41,6 @@
         tileSize: 512,
         zoomOffset: -1
     }).addTo(map);
-
-    console.log("test");
 
     /* Create layer groups for state, county, and congress*/
     var congressLayers = L.layerGroup().addTo(map);
@@ -97,6 +69,7 @@
                                     '#FFEDA0';
     }
 
+    /* Get color of congressional district based on their census area, darker is bigger */
     function getColor2(c) {
         return c > 75000 ? '#800026' :
             c > 50000  ? '#BD0026' :
@@ -108,6 +81,7 @@
                                     '#FFEDA0';
     }
 
+    /* Get color of county based on their census area, darker is bigger */
     function getColor3(a) {
         return a > 20000 ? '#800026' :
             a > 10000  ? '#BD0026' :
@@ -119,7 +93,7 @@
                                     '#FFEDA0';
     }
 
-    /* Function to fill based on getColor */
+    /* Function to fill area based on getColor */
     function style(feature) {
         return {
             fillColor: getColor(feature.properties.density),
@@ -152,12 +126,11 @@
     }
 
     /* Add the style to the map */
-
     statesJson = L.geoJson(statesData, {style: style}).addTo(statesLayers);
     congressJson = L.geoJson(congressData, {style: style2}).addTo(congressLayers);
     countyJson = L.geoJson(countyData, {style: style3}).addTo(countyLayers);
 
-    /* Give state border on highlight*/
+    /* Give border on highlight*/
     function highlightFeature(e) {
         var layer = e.target;
 
@@ -218,131 +191,11 @@
         onEachFeature: onEachFeature
     }).addTo(countyLayers);
 
+    /* Start out the map in state form */
     map.removeLayer(congressLayers);
     map.removeLayer(countyLayers);
 
-    var info = L.control();
-
-    info.onAdd = function (map) {
-        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-        this.update();
-        return this._div;
-    };
-
-    /* Method that we will use to update the control based on feature properties passed */
-    info.update = function (props) {
-        if(statesToggle){
-            this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-                : 'Hover over a state');
-        }
-        if(congressToggle || countyToggle){
-            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
-                : 'Hover over a state');
-        }
-    };
-
-    info.addTo(map);
-
-    var legend = L.control({position: 'bottomright'});
-
-    /* We make our control based on the population density and add labels for it */
-    legend.onAdd = function (map) {
-
-        var div = L.DomUtil.create('div', 'info legend'),
-            grades,
-            labels = [];
-
-        if(statesToggle){
-            grades = [0, 10, 20, 50, 100, 200, 500, 1000];
-        }
-        if(congressToggle){
-            grades = [0, 5000, 10000, 15000, 25000, 50000, 75000, 100000];
-        }
-
-        // loop through our density intervals and generate a label with a colored square for each interval
-        for (var i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-        }
-
-        return div;
-    };
-
-    legend.addTo(map);
-
-    //
-
-    /* Function for highlighting a state with their party affiliation*/
-    function affiliation() {
-        L.geoJSON(statesData, {
-            style: function (feature) {
-                switch (feature.properties.party) {
-                    case 'Republican':
-                        return {color: "#ff0000"};
-                    case 'Democrat':
-                        return {color: "#0000ff"};
-                    default:
-                        break;
-                }
-            }
-        }).addTo(map);
-    }
-
-    //
-
-
-    /* Add a polygon to the map */
-    var p1 = new L.LatLng(34, -126),
-        p2 = new L.LatLng(40, -125),
-        p3 = new L.LatLng(36, -124),
-        polygonPoints = [p1, p2, p3],
-        polygon = new L.Polygon(polygonPoints);
-
-    map.addLayer(polygon);
-
-    map.on('click', onMapClick);
-
-    var popup = new L.Popup();
-
-    /* On map click at a marker and prompt for label and display where you clicked */
-    function onMapClick(e) {
-        var latlngStr = '(' + e.latlng.lat.toFixed(3) + ', ' + e.latlng.lng.toFixed(3) + ')';
-
-        var markerLocation = new L.LatLng(e.latlng.lat, e.latlng.lng),
-            marker = new L.Marker(markerLocation);
-
-        var label = prompt("Enter marker label:");
-
-        map.addLayer(marker);
-        marker.bindTooltip(label,
-            {
-                permanent: true,
-                direction: 'right'
-            });
-
-
-        popup.setLatLng(e.latlng);
-        popup.setContent("You clicked the map at " + latlngStr);
-        map.openPopup(popup);
-    }
-
-    function toggle() {
-        if(statesToggle) {
-            map.removeLayer(statesLayers);
-            statesToggle = 0;
-            map.addLayer(countyLayers);
-            countyToggle = 1;
-        } else {
-            map.removeLayer(countyLayers);
-            countyToggle = 0;
-            map.addLayer(statesLayers);
-            statesToggle = 1;
-        }
-    }
-
+    /* Changes layers based on which data style is selected */
     function changeData() {
         var eID = document.getElementById("data");
         var dataTxt = eID.options[eID.selectedIndex].text;
@@ -378,6 +231,66 @@
                 break;
         }
     }
+
+    /* "an L.Control is an HTML Element that is at a static position in the map container" */
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+    /* Method that we will use to update the control based on feature properties passed */
+    info.update = function (props) {
+        if(statesToggle){
+            this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+                : 'Hover over a state');
+        }
+        if(congressToggle){
+            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                : 'Hover over a congressional district');
+        }
+        if(countyToggle){
+            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                : 'Hover over a county');
+        }
+    };
+
+    info.addTo(map);
+
+    /* Key/legend to explain the colors */
+    var legend = L.control({position: 'bottomright'});
+
+    /* We make our control based on the population density and add labels for it */
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades,
+            labels = [];
+
+        if(statesToggle){
+            grades = [0, 10, 20, 50, 100, 200, 500, 1000];
+        }
+        /* TODO: Can't get the grades to change for some reason */
+        if(congressToggle){
+            grades = [0, 5000, 10000, 15000, 25000, 50000, 75000, 100000];
+        }
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        }
+
+        return div;
+    };
+
+    legend.addTo(map);
 </script>
 </body>
 </html>
