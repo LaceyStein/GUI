@@ -13,6 +13,7 @@
         <option value="0" >State</option>
         <option value="1">County</option>
         <option value="2" >Congress</option>
+        <option value="3">Precinct</option>
     </select>
 </div>
 
@@ -29,6 +30,7 @@
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="counties.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
+<script type="text/javascript" src="md_census_tract.json"></script>
 
 <script type="text/javascript" src="label/src/Label.js"></script>
 
@@ -56,16 +58,19 @@
     var congressLayers = L.layerGroup().addTo(map);
     var statesLayers = L.layerGroup().addTo(map);
     var countyLayers = L.layerGroup().addTo(map);
+    var precinctLayers = L.layerGroup().addTo(map);
 
     /* Set state on at first */
     var statesToggle = 1;
     var congressToggle = 0;
     var countyToggle = 0;
+    var precinctToggle = 0;
 
     /* Add data to respective layer group */
     var statesJson = L.geoJson(statesData).addTo(statesLayers);
     var congressJson = L.geoJson(congressData).addTo(congressLayers);
     var countyJson = L.geoJson(countyData).addTo(countyLayers);
+    var precinctJson = L.geoJson(precinctData).addTo(precinctLayers);
 
     /* Get color of state based on their population density, darker is more dense */
     function getColor(d) {
@@ -93,6 +98,17 @@
 
     /* Get color of county based on their census area, darker is bigger */
     function getColor3(a) {
+        return a > 20000 ? '#800026' :
+            a > 10000  ? '#BD0026' :
+                a > 5000  ? '#E31A1C' :
+                    a > 4000  ? '#FC4E2A' :
+                        a > 3000   ? '#FD8D3C' :
+                            a > 2000   ? '#FEB24C' :
+                                a > 1000   ? '#FED976' :
+                                    '#FFEDA0';
+    }
+
+    function getColor4(a) {
         return a > 20000 ? '#800026' :
             a > 10000  ? '#BD0026' :
                 a > 5000  ? '#E31A1C' :
@@ -134,11 +150,22 @@
             fillOpacity: 0.5
         };
     }
+    function style4(feature) {
+        return {
+            fillColor: getColor4(feature.properties.CENSUSAREA),
+            weight: 2,
+            opacity: 0.5,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.5
+        };
+    }
 
     /* Add the style to the map */
     statesJson = L.geoJson(statesData, {style: style}).addTo(statesLayers);
     congressJson = L.geoJson(congressData, {style: style2}).addTo(congressLayers);
     countyJson = L.geoJson(countyData, {style: style3}).addTo(countyLayers);
+    precinctJson = L.geoJson(precinctData, {style: style4}).addTo(precinctLayers);
 
     /* Give border on highlight*/
     function highlightFeature(e) {
@@ -167,6 +194,9 @@
         }
         if(countyToggle) {
             countyJson.resetStyle(e.target);
+        }
+        if(precinctToggle) {
+            precinctJson.resetStyle(e.target);
         }
         info.update();
     }
@@ -201,9 +231,15 @@
         onEachFeature: onEachFeature
     }).addTo(countyLayers);
 
+    precinctJson = L.geoJson(precinctData, {
+        style: style4,
+        onEachFeature: onEachFeature
+    }).addTo(precinctLayers);
+
     /* Start out the map in state form */
     map.removeLayer(congressLayers);
     map.removeLayer(countyLayers);
+    map.removeLayer(precinctLayers);
 
     /* Changes layers based on which data style is selected */
     function changeData() {
@@ -220,6 +256,8 @@
                 congressToggle = 0;
                 map.addLayer(statesLayers);
                 statesToggle = 1;
+                map.removeLayer(precinctLayers);
+                precinctToggle = 0;
                 break;
             case 'County':
                 map.removeLayer(statesLayers);
@@ -228,6 +266,8 @@
                 congressToggle = 0;
                 map.addLayer(countyLayers);
                 countyToggle = 1;
+                map.removeLayer(precinctLayers);
+                precinctToggle = 0;
                 break;
             case 'Congress':
                 map.removeLayer(statesLayers);
@@ -236,7 +276,18 @@
                 countyToggle = 0;
                 map.addLayer(congressLayers);
                 congressToggle = 1;
+                map.removeLayer(precinctLayers);
+                precinctToggle = 0;
                 break;
+            case 'Precinct':
+                map.removeLayer(statesLayers);
+                statesToggle = 0;
+                map.removeLayer(countyLayers);
+                countyToggle = 0;
+                map.removeLayer(congressLayers);
+                congressToggle = 0;
+                map.addLayer(precinctLayers);
+                precinctToggle = 1;
             default:
                 break;
         }
@@ -267,6 +318,11 @@
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
                 : 'Hover over a county');
+        }
+        if(precinctToggle){
+            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                : 'Hover over a precinct');
         }
     };
 
