@@ -16,6 +16,16 @@
     </select>
 </div>
 
+<div class="dropdown_state">
+    <select id="state_change" onchange="changeStateView()">
+            <option selected disabled value="0">Choose state:</option>
+            <option value="1">Florida</option>
+            <option value="2">Maryland</option>
+            <option value="3">New York</option>
+            <option value="4">U.S. Map</option>
+    </select>
+</div>
+
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="counties.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
@@ -291,6 +301,29 @@
     };
 
     legend.addTo(map);
+
+    function changeStateView() {
+        var e = document.getElementById("state_change");
+        var chosenState = e.options[e.selectedIndex].text;
+        console.log(chosenState);
+
+        if (chosenState == "Florida") {
+            map.flyTo([27.66, -81.5], 6);
+        }
+
+        else if (chosenState == "Maryland") {
+            map.flyTo([39.04, -76.64], 7.5);
+        }
+
+        else if (chosenState == "New York") {
+            map.flyTo([43.3, -74.21], 6.5);
+        }
+        else if (chosenState == "U.S. Map") {
+            map.flyTo([37.8, -96], 4);
+        }
+
+    }
+
 </script>
 </body>
 </html>
