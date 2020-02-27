@@ -219,7 +219,7 @@
         };
     }
 
-    /* Add the style to the map */
+    /* Add the style to the map. */
     statesJson = L.geoJson(statesData, {style: style}).addTo(statesLayers);
     congressJson = L.geoJson(congressData, {style: style2}).addTo(congressLayers);
     countyJson = L.geoJson(countyData, {style: style3}).addTo(countyLayers);
