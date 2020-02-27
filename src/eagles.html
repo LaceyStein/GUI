@@ -4,28 +4,86 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
     <link rel="stylesheet" href="eagles.css">
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
-<div id = "map"></div>
-
-<div class="dropdown">
-    <select id="data" onchange="changeData()">
-        <option value="0" >State</option>
-        <option value="1">County</option>
-        <option value="2" >Congress</option>
-        <option value="3">Precinct</option>
-    </select>
+<div class="container-fluid">
+    <div class="row" style="height: 512px;">
+        <div class="col-lg-6">
+            <div id = "map"></div>
+        </div>
+        <div class="col-lg-6">
+            <!-- <div id="right_pane" class="align-right">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#">User comment</a></li>
+                    <li><a href="#">View Data Sources</a></li>
+                    <li><a href="#">Menu 2</a></li>
+                    <li><a href="#">Menu 3</a></li>
+                </ul>
+            </div> -->
+            <ul class="nav nav-pills">
+                <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
+                <li><a data-toggle="pill" href="#menu1">Menu1</a></li>
+                <li><a data-toggle="pill" href="#menu2">Menu2</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="home" class="tab-pane fade in active">
+                    <h3>Home</h3>
+                    <p>Some content</p>
+                </div>
+                <div id="menu1" class="tab-pane fade">
+                    <h3>Menu 1</h3>
+                    <p>Some content in menu 1</p>  
+                </div>
+                <div id="menu2" class="tab-pane fade">
+                    <h3>Menu 2</h3>
+                    <p>Some content in menu 2</p>  
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            <div class="dropdown">
+                <select id="data" onchange="changeData()" class="form-control">
+                    <option selected disabled value="0">Choose view level:</option>
+                    <option value="1" >State</option>
+                    <option value="2">County</option>
+                    <option value="3" >Congress</option>
+                    <option value="4">Precinct</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="dropdown_state">
+                <select id="state_change" onchange="changeStateView()" class="form-control">
+                        <option selected disabled value="0">Choose state:</option>
+                        <option value="1">Florida</option>
+                        <option value="2">Maryland</option>
+                        <option value="3">New York</option>
+                        <option value="4">U.S. Map</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-lg-2">
+            <div class="dropdown">
+                <select id="election_select"  class="form-control">
+                    <option selected disabled value="0">Choose election:</option>
+                    <option value="1" >2016 Presidential Election</option>
+                    <option value="2">2016 House Election</option>
+                    <option value="3" >2018 House Election</option>
+                </select>
+        </div>
+    </div>
 </div>
 
-<div class="dropdown_state">
-    <select id="state_change" onchange="changeStateView()">
-            <option selected disabled value="0">Choose state:</option>
-            <option value="1">Florida</option>
-            <option value="2">Maryland</option>
-            <option value="3">New York</option>
-            <option value="4">U.S. Map</option>
-    </select>
-</div>
 
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="counties.js"></script>
@@ -37,9 +95,9 @@
 <script type="text/javascript" src="affiliation.js"></script>
 <script type="text/javascript" src="marker.js"></script>
 
-/* TODO: Make toggles actually work. Can turn them on but not off... */
-<div id = "label"><button onclick="addMarker();">toggle marker mode</button></div>
-<div id = "affiliation"><button onclick="affiliation();">toggle affiliation highlight</button></div>
+ <!-- TODO: Make toggles actually work. Can turn them on but not off... -->
+<!-- <div id = "label"><button onclick="addMarker();">toggle marker mode</button></div>
+<div id = "affiliation"><button onclick="affiliation();">toggle affiliation highlight</button></div> -->
 <script>
     /* Create US map using leaflet api and us-states.js data of coordinates */
     var map = L.map('map').setView([37.8, -96], 4);
