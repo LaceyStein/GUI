@@ -29,7 +29,7 @@
             <ul class="nav nav-pills">
                 <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
                 <li><a data-toggle="pill" href="#menu1">Menu1</a></li>
-                <li><a data-toggle="pill" href="#menu2">Menu2</a></li>
+                <li><a data-toggle="pill" href="#CommentsTab">Comments</a></li>
             </ul>
             <div class="tab-content">
                 <div id="home" class="tab-pane fade in active">
@@ -40,9 +40,75 @@
                     <h3>Menu 1</h3>
                     <p>Some content in menu 1</p>  
                 </div>
-                <div id="menu2" class="tab-pane fade">
+                <div id="CommentsTab" class="tab-pane fade">
                     <h3>Menu 2</h3>
-                    <p>Some content in menu 2</p>  
+                    <p>
+                        <!-- <div class="form-group">
+                          <label for="commentBox">Add Comments Below:</label>
+                          <textarea class="form-control" id="commentBox" rows="3"></textarea>
+                        </div> -->
+  
+                      <!--  Comment HTML -->
+  
+                      <div class="row bootstrap snippets">
+                          <div class="col-md-12 col-md-offset-0 col-sm-12">
+                              <div class="comment-wrapper">
+                                  <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Comments Section
+                                      </div>
+                                      <div class="panel-body">
+                                          <textarea class="form-control" placeholder="Add a comment..." rows="3"></textarea>
+                                          <br>
+                                          <button type="button" class="btn btn-info pull-right">Post</button>
+                                          <div class="clearfix"></div>
+                                          <hr>
+                                          <ul class="media-list">
+                                              <li class="media">
+                                                  <div class="media-body">
+                                                      <span class="text-muted pull-right">
+                                                          <small class="text-muted">25 min ago</small>
+                                                      </span>
+                                                      <!-- <strong class="text-success">User 1</strong> -->
+                                                      <p>
+                                                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                                          Lorem ipsum dolor sit amet.
+                                                      </p>
+                                                  </div>
+                                              </li>
+                                              <li class="media">
+                                                  <div class="media-body">
+                                                      <span class="text-muted pull-right">
+                                                          <small class="text-muted">30 min ago</small>
+                                                      </span>
+                                                      <!-- <strong class="text-success">User 2</strong> -->
+                                                      <p>
+                                                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                                          Lorem ipsum dolor adipiscing elit.
+                                                      </p>
+                                                  </div>
+                                              </li>
+                                              <li class="media">
+                                                  <div class="media-body">
+                                                      <span class="text-muted pull-right">
+                                                          <small class="text-muted">48 min ago</small>
+                                                      </span>
+                                                      <!-- <strong class="text-success">User 3</strong> -->
+                                                      <p>
+                                                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                                      </p>
+                                                  </div>
+                                              </li>
+                                          </ul>
+                                      </div>
+                                  </div>
+                              </div>
+  
+                          </div>
+                      </div>
+                      <!--  Comment HTML -->
+                      </p>
+   
                 </div>
             </div>
         </div>
@@ -77,9 +143,19 @@
                 <select id="election_select"  class="form-control">
                     <option selected disabled value="0">Choose election:</option>
                     <option value="1" >2016 Presidential Election</option>
-                    <option value="2">2016 House Election</option>
-                    <option value="3" >2018 House Election</option>
+                    <option value="2">2016 Congressional Election</option>
+                    <option value="3" >2018 Congressional Election</option>
                 </select>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <div class="dropdown">
+            <select id="data_type_select" class="form-control">
+                <option selected disabled value="0">Choose data type to view:</option>
+                <option value="1" >Population Data</option>
+                <option value="2">Demographic Data</option>
+                <option value="3" >Election Data</option>
+            </select>
         </div>
     </div>
 </div>
@@ -119,7 +195,7 @@
     var precinctLayers = L.layerGroup().addTo(map);
 
     /* Set state on at first */
-    var statesToggle = 1;
+    var statesToggle = 0;
     var congressToggle = 0;
     var countyToggle = 0;
     var precinctToggle = 0;
@@ -363,18 +439,63 @@
     /* Method that we will use to update the control based on feature properties passed */
     info.update = function (props) {
         if(statesToggle){
-            this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+            var e = document.getElementById("data_type_select");
+            var chosenData = e.options[e.selectedIndex].text;
+            e = document.getElementById("election_select");
+            var chosenElection = e.options[e.selectedIndex].text;
+            if(chosenData == "Population Data") {
+                this._div.innerHTML = '<h4>US Election Data</h4>' +  (props ?
+                    '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a state');
+            }
+            else if (chosenData == "Election Data") {
+                if (chosenElection == "2016 Presidential Election") {
+                this._div.innerHTML = '<h4>US 2016 Presidential Election Data</h4>' +  (props ?
+                    '<b>' + props.name + '</b><br />' + props.election_pres[0] + '% Democrat' +
+                    '<br />' + props.election_pres[1] + "% Republican"
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a state');
+                }
+                else if (chosenElection == "2016 Congressional Election") {
+                    this._div.innerHTML = '<h4>US 2016 Congressional Election Data</h4>' +  (props ?
+                    '<b>' + props.name + '</b><br />' + '<b><h5>House Data</h5></b>' + props.election_house_16[0] + '% Democrat ' +
+                    + props.election_house_16[1] + "% Republican" + '<br />' + '<h5><b>Senate Data</b></h5>' +
+                    props.election_senate_16[0] + '% Democrat ' +
+                    props.election_senate_16[1] + "% Republican"
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a state');
+                }
+                else if (chosenElection == "2018 Congressional Election") {
+                    this._div.innerHTML = '<h4>US 2018 Congressional Election Data</h4>' +  (props ?
+                    '<b>' + props.name + '</b><br />' + '<h5><b>House Data</b></h5>' + props.election_house_18[0] + '% Democrat ' +
+                    + props.election_house_18[1] + "% Republican" + '<br />' + '<h5><b>Senate Data</b></h5>' + 
+                    props.election_senate_18[0] + '% Democrat ' +
+                     props.election_senate_18[1] + "% Republican"
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a state');
+                }
+            }
+            else if (chosenData == "Demographic Data") {
+                this._div.innerHTML = '<h4>Demographics</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + 'percent white: ' + props.demo_data[0] + '%' +
+                '</b><br />' + 'percent hispanic: ' + props.demo_data[1] + '%' +
+                '</b><br />' + 'percent black: ' + props.demo_data[2] + '%' +
+                '</b><br />' + 'percent asian: ' + props.demo_data[3] + '%'
+                + '<h5><i>Source: US Census</i>' //dummy data to remove
                 : 'Hover over a state');
+            }
         }
         if(congressToggle){
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                + '<h5><i>Source: US Census</i>' //dummy data to remove
                 : 'Hover over a congressional district');
         }
         if(countyToggle){
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+                + '<h5><i>Source: US Census</i>' //dummy data to remove
                 : 'Hover over a county');
         }
 
@@ -389,6 +510,7 @@
                 '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POPULA)*100) + '%' +
                 '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POPULA)*100) + '%' +
                 '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POPULA)*100) + '%'
+                + '<h5><i>Source: US Census</i>' //dummy data to remove
                 : 'Hover over a precinct');
         }
     };
