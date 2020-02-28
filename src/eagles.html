@@ -30,6 +30,8 @@
                 <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
                 <li><a data-toggle="pill" href="#menu1">Menu1</a></li>
                 <li><a data-toggle="pill" href="#CommentsTab">Comments</a></li>
+                <li><a data-toggle="pill" href="#GhostPrecinctTab">Add Ghost Precinct</a></li>
+                <li><a data-toggle="pill" href="#CombinePrecinctTab">Combine Two Precincts</a></li>
             </ul>
             <div class="tab-content">
                 <div id="home" class="tab-pane fade in active">
@@ -41,7 +43,6 @@
                     <p>Some content in menu 1</p>  
                 </div>
                 <div id="CommentsTab" class="tab-pane fade">
-                    <h3>Menu 2</h3>
                     <p>
                         <!-- <div class="form-group">
                           <label for="commentBox">Add Comments Below:</label>
@@ -109,6 +110,22 @@
                       <!--  Comment HTML -->
                       </p>
    
+                </div>
+                <div id="GhostPrecinctTab" class="tab-pane fade">
+                    <div id="InnerGhostPrecinct" style="display: none;">
+                        <h3>Add a ghost precinct</h3>
+                        <p>Click on a precinct and then press the submit button to generate a ghost precinct.</p>
+                        <button type="button" class="btn btn-info pull-center">Submit</button>
+                    </div>
+                    <h3 id="WarningGhostPrecinct" style="display: block;">Please select the precinct view to enable this option.</h3>
+                </div>
+                <div id="CombinePrecinctTab" class="tab-pane fade">
+                    <div id="InnerCombinePrecinct" style="display: none;">
+                        <h3>Combine two precincts</h3>
+                        <p>Click on two precincts and then press the submit button to combine two precincts.</p>
+                        <button type="button" class="btn btn-info pull-center">Submit</button>
+                    </div>
+                    <h3 id="WarningCombinePrecinct" style="display: block;">Please select the precinct view to enable this option.</h3>
                 </div>
             </div>
         </div>
@@ -392,6 +409,10 @@
                 statesToggle = 1;
                 map.removeLayer(precinctLayers);
                 precinctToggle = 0;
+                document.getElementById("InnerGhostPrecinct").style.display = "none";
+                document.getElementById("WarningGhostPrecinct").style.display = "block";
+                document.getElementById("InnerCombinePrecinct").style.display = "none";
+                document.getElementById("WarningCombinePrecinct").style.display = "block";
                 break;
             case 'County':
                 map.removeLayer(statesLayers);
@@ -402,6 +423,10 @@
                 countyToggle = 1;
                 map.removeLayer(precinctLayers);
                 precinctToggle = 0;
+                document.getElementById("InnerGhostPrecinct").style.display = "none";
+                document.getElementById("WarningGhostPrecinct").style.display = "block";
+                document.getElementById("InnerCombinePrecinct").style.display = "none";
+                document.getElementById("WarningCombinePrecinct").style.display = "block";
                 break;
             case 'Congress':
                 map.removeLayer(statesLayers);
@@ -412,6 +437,10 @@
                 congressToggle = 1;
                 map.removeLayer(precinctLayers);
                 precinctToggle = 0;
+                document.getElementById("InnerGhostPrecinct").style.display = "none";
+                document.getElementById("WarningGhostPrecinct").style.display = "block";
+                document.getElementById("InnerCombinePrecinct").style.display = "none";
+                document.getElementById("WarningCombinePrecinct").style.display = "block";
                 break;
             case 'Precinct':
                 map.removeLayer(statesLayers);
@@ -422,6 +451,10 @@
                 congressToggle = 0;
                 map.addLayer(precinctLayers);
                 precinctToggle = 1;
+                document.getElementById("InnerGhostPrecinct").style.display = "block";
+                document.getElementById("WarningGhostPrecinct").style.display = "none";
+                document.getElementById("InnerCombinePrecinct").style.display = "block";
+                document.getElementById("WarningCombinePrecinct").style.display = "none";
             default:
                 break;
         }
