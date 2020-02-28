@@ -88,7 +88,7 @@
 <script type="text/javascript" src="us-states.js"></script>
 <script type="text/javascript" src="counties.js"></script>
 <script type="text/javascript" src="congressional.js"></script>
-<script type="text/javascript" src="md_census_tract.json"></script>
+<script type="text/javascript" src="MD_precinct.json"></script>
 
 <script type="text/javascript" src="label/src/Label.js"></script>
 
@@ -377,9 +377,18 @@
                 '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
                 : 'Hover over a county');
         }
+
+        /* Uses the properties found in MD_precinct.json just like the other hover stuff. */
+        /* Calculates demographic percent by doing adjusted population of race divided by total adjusted population times 100. */
+        /* On mine it says the variables aren't found for some reason but they obviously are there so I just ignored it. */
+        /* There is also properties that have 18 in them, such as ADJ_18__PO, I'm assuming this means population over 18?
+            But I'm not totally sure. Possibly change data to the 18 versions if we figure out what that means. */
+        /* TODO: Add in the other races */
         if(precinctToggle){
-            this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
+            this._div.innerHTML = '<h4>Demographics</h4>' +  (props ?
+                '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POPULA)*100) + '%' +
+                '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POPULA)*100) + '%' +
+                '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POPULA)*100) + '%'
                 : 'Hover over a precinct');
         }
     };
