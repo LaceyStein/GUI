@@ -213,7 +213,7 @@
     var precinctLayers = L.layerGroup().addTo(map);
 
     /* Set state on at first */
-    var statesToggle = 0;
+    var statesToggle = 1;
     var congressToggle = 0;
     var countyToggle = 0;
     var precinctToggle = 0;
@@ -304,7 +304,7 @@
     }
     function style4(feature) {
         return {
-            fillColor: getColor4(feature.properties.CENSUSAREA),
+            fillColor: getColor4(feature.properties.ADJ_POPULA),
             weight: 2,
             opacity: 0.5,
             color: 'white',
@@ -480,13 +480,13 @@
 
     /* Method that we will use to update the control based on feature properties passed */
     info.update = function (props) {
+        var e = document.getElementById("data_type_select");
+        var chosenData = e.options[e.selectedIndex].text;
+        e = document.getElementById("election_select");
+        var chosenElection = e.options[e.selectedIndex].text;
         if(statesToggle){
-            var e = document.getElementById("data_type_select");
-            var chosenData = e.options[e.selectedIndex].text;
-            e = document.getElementById("election_select");
-            var chosenElection = e.options[e.selectedIndex].text;
             if(chosenData == "Population Data") {
-                this._div.innerHTML = '<h4>US Election Data</h4>' +  (props ?
+                this._div.innerHTML = '<h4>US Population Data</h4>' +  (props ?
                     '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
                     : 'Hover over a state');
@@ -548,12 +548,20 @@
             But I'm not totally sure. Possibly change data to the 18 versions if we figure out what that means. */
         /* TODO: Add in the other races */
         if(precinctToggle){
-            this._div.innerHTML = '<h4>Demographics</h4>' +  (props ?
-                '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POPULA)*100) + '%' +
-                '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POPULA)*100) + '%' +
-                '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POPULA)*100) + '%'
-                + '<h5><i>Source: US Census</i>' //dummy data to remove
-                : 'Hover over a precinct');
+            if(chosenData == "Population Data") {
+                this._div.innerHTML = '<h4>Population Data</h4>' +  (props ?
+                    '<b>' + props.NAME + '</b><br />' + props.ADJ_POPULA + ' people / mi<sup>2</sup>'
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a state');
+            }
+            if(chosenData == "Demographic Data") {
+                this._div.innerHTML = '<h4>Demographics</h4>' + (props ?
+                    '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POPULA) * 100) + '%' +
+                    '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POPULA) * 100) + '%' +
+                    '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POPULA) * 100) + '%'
+                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    : 'Hover over a precinct');
+            }
         }
     };
 
