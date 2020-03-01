@@ -595,6 +595,7 @@
         }
 
         if (chosenData == "Election Data") {
+            map.removeControl(legend);
             e = document.getElementById("election_select");
             e.style.display = "block";
             var chosenElection = e.options[e.selectedIndex].text;
@@ -621,6 +622,7 @@
             }
         }
         else {
+            legend.addTo(map);
             e = document.getElementById("election_select");
             e.style.display = "none";
             statesLayers.removeLayer(statesJson);
