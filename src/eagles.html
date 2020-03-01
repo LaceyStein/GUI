@@ -28,7 +28,7 @@
             </div> -->
             <ul class="nav nav-pills">
                 <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
-                <li><a data-toggle="pill" href="#menu1">Menu1</a></li>
+                <li><a data-toggle="pill" href="#CorrectionsTab">Corrections</a></li>
                 <li><a data-toggle="pill" href="#CommentsTab">Comments</a></li>
                 <li><a data-toggle="pill" href="#GhostPrecinctTab">Add Ghost Precinct</a></li>
                 <li><a data-toggle="pill" href="#CombinePrecinctTab">Combine Two Precincts</a></li>
@@ -39,9 +39,65 @@
                     <h3>Home</h3>
                     <p>Some content</p>
                 </div>
-                <div id="menu1" class="tab-pane fade">
-                    <h3>Menu 1</h3>
-                    <p>Some content in menu 1</p>  
+                <div id="CorrectionsTab" class="tab-pane fade">
+                    <h3>Corrections & History</h3>
+                    <!-- Corrections tab -->
+                    <div class="row" style="margin-top: 10px;">
+                    <h5 style="margin-left: 15px;">State:</h5>
+                    <div class="col-lg-6">
+                        <div class="dropdown">
+                            <select id="correction-state" class="form-control">
+                                <option selected disabled value="0">Choose state</option>
+                                <option value="1" >Florida</option>
+                                <option value="2">New York</option>
+                                <option value="3" >Maryland</option>
+                            </select>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="row" style="margin-top: 10px;">
+                        <h5 style="margin-left: 15px;">Precinct:</h5>
+                        <div class="col-lg-6">
+                            <div class="dropdown">
+                                <select id="correction-precinct" class="form-control">
+                                    <option selected disabled value="0">Choose precinct</option>
+                                    <option value="1" >Florida</option>
+                                    <option value="2">New York</option>
+                                    <option value="3" >Maryland</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 10px;">
+                        <h5 style="margin-left: 15px;">Election:</h5>
+                        <div class="col-lg-6">
+                            <div class="dropdown">
+                                <select id="correction-election" class="form-control">
+                                  <option selected disabled value="0">Choose election</option>
+                                  <option value="1" >2016 Presidential Election</option>
+                                  <option value="2">2016 Congressional Election</option>
+                                  <option value="3" >2018 Congressional Election</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                        <h5 style="margin-left: 15px;">Corrections:</h5>
+                        <div class="col-lg-6">
+                            <div class="dropdown">
+                                <select id="correction-list" class="form-control">
+                                  <option selected disabled value="0">Choose correction</option>
+                                  <option value="1" >Fix self-intersecting precincts</option>
+                                  <option value="2">Fix open borders</option>
+                                  <option value="3" >Fix overlapping precincts</option>
+                                  <option value="4" >Fix gaps in precincts</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                        <br>
+                        <button type="button" class="btn btn-info pull-left">Submit</button>
+                        <!-- Corrections tab -->
                 </div>
                 <div id="CommentsTab" class="tab-pane fade">
                     <p>
