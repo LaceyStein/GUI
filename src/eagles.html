@@ -27,20 +27,21 @@
                 </ul>
             </div> -->
             <ul class="nav nav-pills">
-                <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
-                <li><a data-toggle="pill" href="#CorrectionsTab">Corrections</a></li>
+                <!-- <li class="active"><a data-toggle="pill" href="#home">Home</a></li> -->
+                <li><a class="active" data-toggle="pill" href="#CorrectionsTab">Submit Correction</a></li>
+                <li><a data-toggle="pill" href="#HistoryTab">Correction History</a></li>
                 <li><a data-toggle="pill" href="#CommentsTab">Comments</a></li>
                 <li><a data-toggle="pill" href="#GhostPrecinctTab">Add Ghost Precinct</a></li>
-                <li><a data-toggle="pill" href="#CombinePrecinctTab">Combine Two Precincts</a></li>
+                <li><a data-toggle="pill" href="#CombinePrecinctTab">Combine Precincts</a></li>
                 <li><a data-toggle="pill" href="#AddPrecinctTab">Add Precinct Edges</a></li>
             </ul>
             <div class="tab-content">
-                <div id="home" class="tab-pane fade in active">
+                <!-- <div id="home" class="tab-pane fade in active">
                     <h3>Home</h3>
                     <p>Some content</p>
-                </div>
+                </div> -->
                 <div id="CorrectionsTab" class="tab-pane fade">
-                    <h3>Corrections & History</h3>
+                    <h3>Submit a correction</h3>
                     <!-- Corrections tab -->
                     <div class="row" style="margin-top: 10px;">
                     <h5 style="margin-left: 15px;">State:</h5>
@@ -98,6 +99,40 @@
                         <br>
                         <button type="button" class="btn btn-info pull-left">Submit</button>
                         <!-- Corrections tab -->
+                </div>
+                <div id="HistoryTab" class="tab-pane fade">
+                    <h3>History</h3>
+                    <table class="table table-striped table-bordered table-sm" cellspacing="0"
+                    width="100%">
+                        <thead>
+                          <tr>
+                            <th scope="col">Date and Time</th>
+                            <th scope="col">State</th>
+                            <th scope="col">Precinct</th>
+                            <th scope="col">Correction</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row">2019-08-07 12:24:45</th>
+                            <td>Maryland</td>
+                            <td>Queen Anne 06-001</td>
+                            <td>Fixed self-intersecting precinct</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">2019-08-07 12:24:45</th>
+                            <td>Maryland</td>
+                            <td>Montgomery 01-001</td>
+                            <td>Fixed open border</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">2019-08-07 12:24:45</th>
+                            <td>Maryland</td>
+                            <td>Prince George 03-006</td>
+                            <td>Fixed gap in precinct</td>
+                          </tr>
+                        </tbody>
+                      </table>
                 </div>
                 <div id="CommentsTab" class="tab-pane fade">
                     <p>
@@ -227,25 +262,25 @@
     <div class="row" style="margin-top: 10px;">
         <div class="col-lg-2">
             <div class="dropdown">
-                <select id="election_select"  class="form-control">
+                <select id="data_type_select" class="form-control" onchange="alterStyleData()">
+                    <option selected disabled value="0">Choose data type to view:</option>
+                    <option value="1" >Population Data</option>
+                    <option value="2">Demographic Data</option>
+                    <option value="3" >Election Data</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="dropdown">
+                <select id="election_select"  style="display: none;" class="form-control" onchange="alterStyleData()">
                     <option selected disabled value="0">Choose election:</option>
                     <option value="1" >2016 Presidential Election</option>
                     <option value="2">2016 Congressional Election</option>
                     <option value="3" >2018 Congressional Election</option>
                 </select>
+            </div>
         </div>
     </div>
-    <div class="col-lg-2">
-        <div class="dropdown">
-            <select id="data_type_select" class="form-control">
-                <option selected disabled value="0">Choose data type to view:</option>
-                <option value="1" >Population Data</option>
-                <option value="2">Demographic Data</option>
-                <option value="3" >Election Data</option>
-            </select>
-        </div>
-    </div>
-</div>
 
 
 <script type="text/javascript" src="us-states.js"></script>
@@ -339,6 +374,12 @@
                                 a > 1000   ? '#FED976' :
                                     '#FFEDA0';
     }
+    function getElectionColor(a) {
+        return a > 65 ? '#0000CC' :
+            a > 50 ? '#99CCFF' :
+                a > 35 ? '#FF8080':
+                '#FF0000';
+    }
 
     /* Function to fill area based on getColor */
     function style(feature) {
@@ -382,6 +423,38 @@
         };
     }
 
+    function styleElectionSenate16(feature) {
+        return {
+            fillColor: getElectionColor(feature.properties.election_senate_16[0]),
+            weight: 2,
+            opacity: 1.0,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 1.0
+        };
+    }
+
+    function styleElectionSenate18(feature) {
+        return {
+            fillColor: getElectionColor(feature.properties.election_senate_18[0]),
+            weight: 2,
+            opacity: 1.0,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 1.0
+        };
+    }
+
+    function styleElectionPres(feature) {
+        return {
+            fillColor: getElectionColor(feature.properties.election_pres[0]),
+            weight: 2,
+            opacity: 1.0,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 1.0
+        };
+    }
     /* Add the style to the map. */
     statesJson = L.geoJson(statesData, {style: style}).addTo(statesLayers);
     congressJson = L.geoJson(congressData, {style: style2}).addTo(congressLayers);
@@ -465,6 +538,10 @@
         else {
             alert((document.getElementById('GhostPrecinctName').innerHTML).replace("<b>Precinct Selected: </b>", "") + " added as ghost precinct");
             document.getElementById('GhostPrecinctName').innerHTML = "<b>Precinct Selected: </b>None";
+            document.getElementById('CombinePrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
+            document.getElementById('CombinePrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
+            document.getElementById('AddPrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
+            document.getElementById('AddPrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
         }
     }
     function submitCombinePrecinct() {
@@ -476,6 +553,10 @@
             (document.getElementById('CombinePrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were combined");
             document.getElementById('CombinePrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
             document.getElementById('CombinePrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
+            document.getElementById('AddPrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
+            document.getElementById('AddPrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
+            document.getElementById('GhostPrecinctName').innerHTML = "<b>Precinct Selected: </b>None";
+
         }
     }
 
@@ -488,6 +569,66 @@
             (document.getElementById('AddPrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were combined");
             document.getElementById('AddPrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
             document.getElementById('AddPrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
+            document.getElementById('CombinePrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
+            document.getElementById('CombinePrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
+            document.getElementById('GhostPrecinctName').innerHTML = "<b>Precinct Selected: </b>None";
+
+        }
+    }
+
+    function alterStyleData() {
+        var e = document.getElementById("data_type_select");
+        var chosenData = e.options[e.selectedIndex].text;
+        if (statesToggle) {
+            layer = statesLayers;
+        }
+        else if (congressToggle) {
+            layer = congressLayers;
+        }
+
+        else if (countyToggle) {
+            layer = countyLayers;
+        }
+
+        else if (precinctToggle) {
+            layer = precinctLayers;
+        }
+
+        if (chosenData == "Election Data") {
+            e = document.getElementById("election_select");
+            e.style.display = "block";
+            var chosenElection = e.options[e.selectedIndex].text;
+            if (chosenElection == "2016 Congressional Election") {
+                statesLayers.removeLayer(statesJson);
+                statesJson = L.geoJson(statesData, {
+                    style: styleElectionSenate16,
+                    onEachFeature: onEachFeature
+                }).addTo(statesLayers);
+            }
+            else if (chosenElection == "2018 Congressional Election") {
+                statesLayers.removeLayer(statesJson);
+                statesJson = L.geoJson(statesData, {
+                    style: styleElectionSenate18,
+                    onEachFeature: onEachFeature
+                }).addTo(statesLayers);
+            }
+            else if (chosenElection == "2016 Presidential Election") {
+                statesLayers.removeLayer(statesJson);
+                statesJson = L.geoJson(statesData, {
+                    style: styleElectionPres,
+                    onEachFeature: onEachFeature
+                }).addTo(statesLayers);
+            }
+        }
+        else {
+            e = document.getElementById("election_select");
+            e.style.display = "none";
+            statesLayers.removeLayer(statesJson);
+            statesJson = L.geoJson(statesData, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(statesLayers);
+
         }
     }
 
@@ -625,8 +766,7 @@
                 }
                 else if (chosenElection == "2016 Congressional Election") {
                     this._div.innerHTML = '<h4>US 2016 Congressional Election Data</h4>' +  (props ?
-                    '<b>' + props.name + '</b><br />' + '<b><h5>House Data</h5></b>' + props.election_house_16[0] + '% Democrat ' +
-                    + props.election_house_16[1] + "% Republican" + '<br />' + '<h5><b>Senate Data</b></h5>' +
+                    '<b>' + props.name + '</b><br />'  + '<h5><b>Senate Data</b></h5>' +
                     props.election_senate_16[0] + '% Democrat ' +
                     props.election_senate_16[1] + "% Republican"
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
@@ -634,8 +774,7 @@
                 }
                 else if (chosenElection == "2018 Congressional Election") {
                     this._div.innerHTML = '<h4>US 2018 Congressional Election Data</h4>' +  (props ?
-                    '<b>' + props.name + '</b><br />' + '<h5><b>House Data</b></h5>' + props.election_house_18[0] + '% Democrat ' +
-                    + props.election_house_18[1] + "% Republican" + '<br />' + '<h5><b>Senate Data</b></h5>' + 
+                    '<b>' + props.name + '</b><br />' + '<h5><b>Senate Data</b></h5>' + 
                     props.election_senate_18[0] + '% Democrat ' +
                      props.election_senate_18[1] + "% Republican"
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
