@@ -86,7 +86,7 @@
                         <h5 style="margin-left: 15px;">Corrections:</h5>
                         <div class="col-lg-6">
                             <div class="dropdown">
-                                <select id="correction-list" class="form-control">
+                                <select id="correction-list" onchange = "changeCorrection()" class="form-control">
                                   <option selected disabled value="0">Choose correction</option>
                                   <option value="1" >Fix self-intersecting precincts</option>
                                   <option value="2">Fix open borders</option>
@@ -882,6 +882,21 @@
             map.flyTo([37.8, -96], 4);
         }
 
+    }
+
+    /* If the chosen correction is fix overlapping precincts then pop-up a marker to one that I found. */
+    /* TODO: Make this dynamic if we keep this. Thinking of making a markers array that has a value
+        for what kind of error it is and then it would show all markers with that error when you switch it.
+        For now for GUI Demo this is fine.
+     */
+    function changeCorrection(){
+        var e = document.getElementById("correction-list");
+        var chosenCorrection = e.options[e.selectedIndex].text;
+        console.log(chosenCorrection);
+
+        if(chosenCorrection == "Fix overlapping precincts"){
+            addMarker();
+        }
     }
 
 </script>
