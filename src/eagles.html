@@ -28,7 +28,7 @@
             </div> -->
             <ul class="nav nav-pills">
                 <!-- <li class="active"><a data-toggle="pill" href="#home">Home</a></li> -->
-                <li><a class="active" data-toggle="pill" href="#CorrectionsTab">Submit Correction</a></li>
+                <li class="active"><a data-toggle="pill" href="#CorrectionsTab">Submit Correction</a></li>
                 <li><a data-toggle="pill" href="#HistoryTab">Correction History</a></li>
                 <li><a data-toggle="pill" href="#CommentsTab">Comments</a></li>
                 <li><a data-toggle="pill" href="#GhostPrecinctTab">Add Ghost Precinct</a></li>
@@ -40,7 +40,7 @@
                     <h3>Home</h3>
                     <p>Some content</p>
                 </div> -->
-                <div id="CorrectionsTab" class="tab-pane fade">
+                <div id="CorrectionsTab" class="tab-pane fade in active">
                     <h3>Submit a correction</h3>
                     <!-- Corrections tab -->
                     <div class="row" style="margin-top: 10px;">
@@ -140,9 +140,9 @@
                           <label for="commentBox">Add Comments Below:</label>
                           <textarea class="form-control" id="commentBox" rows="3"></textarea>
                         </div> -->
-  
+
                       <!--  Comment HTML -->
-  
+
                       <div class="row bootstrap snippets">
                           <div class="col-md-12 col-md-offset-0 col-sm-12">
                               <div class="comment-wrapper">
@@ -196,12 +196,12 @@
                                       </div>
                                   </div>
                               </div>
-  
+
                           </div>
                       </div>
                       <!--  Comment HTML -->
                       </p>
-   
+
                 </div>
                 <div id="GhostPrecinctTab" class="tab-pane fade">
                     <div id="InnerGhostPrecinct" style="display: none;">
@@ -549,7 +549,7 @@
             alert("Please select both precincts");
         }
         else {
-            alert((document.getElementById('CombinePrecinctNameOne').innerHTML).replace("<b>First Precinct Selected: </b>", "") + " and " + 
+            alert((document.getElementById('CombinePrecinctNameOne').innerHTML).replace("<b>First Precinct Selected: </b>", "") + " and " +
             (document.getElementById('CombinePrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were combined");
             document.getElementById('CombinePrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
             document.getElementById('CombinePrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
@@ -565,7 +565,7 @@
             alert("Please select both precincts");
         }
         else {
-            alert((document.getElementById('AddPrecinctNameOne').innerHTML).replace("<b>First Precinct Selected: </b>", "") + " and " + 
+            alert((document.getElementById('AddPrecinctNameOne').innerHTML).replace("<b>First Precinct Selected: </b>", "") + " and " +
             (document.getElementById('AddPrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were combined");
             document.getElementById('AddPrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
             document.getElementById('AddPrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
@@ -776,7 +776,7 @@
                 }
                 else if (chosenElection == "2018 Congressional Election") {
                     this._div.innerHTML = '<h4>US 2018 Congressional Election Data</h4>' +  (props ?
-                    '<b>' + props.name + '</b><br />' + '<h5><b>Senate Data</b></h5>' + 
+                    '<b>' + props.name + '</b><br />' + '<h5><b>Senate Data</b></h5>' +
                     props.election_senate_18[0] + '% Democrat ' +
                      props.election_senate_18[1] + "% Republican"
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
