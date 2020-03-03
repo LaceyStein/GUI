@@ -329,14 +329,56 @@
     var marylandJson = L.geoJson(marylandData).addTo(marylandLayers);
 
     /* Get color of state based on their population density, darker is more dense */
-    function getPopulationColor(d, num) {
-        return d > num ? '#800026' :
-            d > num*.3  ? '#BD0026' :
-                d > num*.15  ? '#E31A1C' :
-                    d > num*.1  ? '#FC4E2A' :
-                        d > num*.05   ? '#FD8D3C' :
-                            d > num*.02   ? '#FEB24C' :
-                                d > num*.01   ? '#FED976' :
+    // function getPopulationColor(d, num) {
+    //     return d > num ? '#800026' :
+    //         d > num*.3  ? '#BD0026' :
+    //             d > num*.15  ? '#E31A1C' :
+    //                 d > num*.1  ? '#FC4E2A' :
+    //                     d > num*.05   ? '#FD8D3C' :
+    //                         d > num*.02   ? '#FEB24C' :
+    //                             d > num*.01   ? '#FED976' :
+    //                                 '#FFEDA0';
+    // }
+
+    function statePopColor(d) {
+        return d > 500 ? '#800026' :
+            d > 400  ? '#E31A1C' :
+                d > 300   ? '#FD8D3C' :
+                    '#FFEDA0';
+    }
+
+    /* Get color of congressional district based on their census area, darker is bigger */
+    function countyPopColor(c) {
+        return c > 75000 ? '#800026' :
+            c > 50000  ? '#BD0026' :
+                c > 25000  ? '#E31A1C' :
+                    c > 20000  ? '#FC4E2A' :
+                        c > 10000   ? '#FD8D3C' :
+                            c > 5000   ? '#FEB24C' :
+                                c > 500   ? '#FED976' :
+                                    '#FFEDA0';
+    }
+
+    /* Get color of congresional based on their census area, darker is bigger */
+    function congressPopColor(a) {
+        return a > 20000 ? '#800026' :
+            a > 10000  ? '#BD0026' :
+                a > 5000  ? '#E31A1C' :
+                    a > 4000  ? '#FC4E2A' :
+                        a > 3000   ? '#FD8D3C' :
+                            a > 2000   ? '#FEB24C' :
+                                a > 1000   ? '#FED976' :
+                                    '#FFEDA0';
+    }
+
+    function marylandPopColor(a) {
+        return a > 20000 ? '#800026' :
+            a > 10000  ? '#BD0026' :
+                a > 5000  ? '#E31A1C' :
+                    a > 4000  ? '#FC4E2A' :
+                        a > 3000   ? '#FD8D3C' :
+                            a > 2000   ? '#FEB24C' :
+                                a > 1000   ? '#FED976' :
                                     '#FFEDA0';
     }
 
@@ -355,10 +397,10 @@
     /*Returns blue or red for amount democrat or republican */
     function getElectionColor(a) {
         return a > 90 ? '#0000CC' : //above 90% dem is dark blue
-                    a > 70 ? '#7671cc' :
-                        a > 50 ? '#b9c6ff' :
-                            a > 25 ? '#FF8080':
-                                '#FF0000';
+            a > 70 ? '#7671cc' :
+                a > 50 ? '#b9c6ff' :
+                    a > 25 ? '#FF8080':
+                        '#FF0000';
     }
 
     /*Default style before you pick a data view, just grey */
@@ -376,7 +418,7 @@
     /* Population State style, scaling number is 1000 */
     function style(feature) {
         return {
-            fillColor: getPopulationColor(feature.properties.density, 1000),
+            fillColor: statePopColor(feature.properties.density),
             weight: 2,
             opacity: 0.7,
             color: 'white',
@@ -388,7 +430,7 @@
     /* Population County style, scaling number is 75000 */
     function style2(feature) {
         return {
-            fillColor: getPopulationColor(feature.properties.CENSUSAREA, 75000),
+            fillColor: congressPopColor(feature.properties.CENSUSAREA),
             weight: 2,
             opacity: 0.7,
             color: 'white',
@@ -400,7 +442,7 @@
     /* Population Congress style, scaling number is 20000 */
     function style3(feature) {
         return {
-            fillColor: getPopulationColor(feature.properties.CENSUSAREA, 20000),
+            fillColor: congressPopColor(feature.properties.CENSUSAREA),
             weight: 2,
             opacity: 0.7,
             color: 'white',
@@ -412,7 +454,7 @@
     /* Population precinct style, scaling number is 20000 */
     function style4(feature) {
         return {
-            fillColor: getPopulationColor(feature.properties.ADJ_POP, 20000),
+            fillColor: marylandPopColor(feature.properties.ADJ_POP),
             weight: 2,
             opacity: 0.7,
             color: 'white',
@@ -689,6 +731,9 @@
         }
         else if(chosenData == "Demographic Data"){
             map.removeControl(legend);
+            e = document.getElementById("election_select");
+            e.style.display = "none";
+
             marylandLayers.removeLayer(marylandJson);
             marylandJson = L.geoJson(marylandData, {
                 style: styleDemographics,
@@ -696,34 +741,37 @@
             }).addTo(marylandLayers);
         }
         else if(chosenData == "Population Data"){
+            // legend.addTo(map);
 
-                statesLayers.removeLayer(statesJson);
-                statesJson = L.geoJson(statesData, {
-                    style: style,
-                    onEachFeature: onEachFeature
-                }).addTo(statesLayers);
+            e = document.getElementById("election_select");
+            e.style.display = "none";
+
+            statesLayers.removeLayer(statesJson);
+            statesJson = L.geoJson(statesData, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(statesLayers);
 
 
-                countyLayers.removeLayer(countyJson);
-                countyJson = L.geoJson(countyData, {
-                    style: style2,
-                    onEachFeature: onEachFeature
-                }).addTo(countyLayers);
+            countyLayers.removeLayer(countyJson);
+            countyJson = L.geoJson(countyData, {
+                style: style2,
+                onEachFeature: onEachFeature
+            }).addTo(countyLayers);
 
-                congressLayers.removeLayer(congressJson);
-                congressJson = L.geoJson(congressData, {
-                    style: style3,
-                    onEachFeature: onEachFeature
-                }).addTo(congressLayers);
+            congressLayers.removeLayer(congressJson);
+            congressJson = L.geoJson(congressData, {
+                style: style3,
+                onEachFeature: onEachFeature
+            }).addTo(congressLayers);
 
-                marylandLayers.removeLayer(marylandJson);
-                marylandJson = L.geoJson(marylandData, {
-                    style: style4,
-                    onEachFeature: onEachFeature
-                }).addTo(marylandLayers);
+            marylandLayers.removeLayer(marylandJson);
+            marylandJson = L.geoJson(marylandData, {
+                style: style4,
+                onEachFeature: onEachFeature
+            }).addTo(marylandLayers);
         }
         else {
-            legend.addTo(map);
             e = document.getElementById("election_select");
             e.style.display = "none";
             statesLayers.removeLayer(statesJson);
@@ -832,12 +880,14 @@
         var chosenElection = e.options[e.selectedIndex].text;
         if(statesToggle){
             if(chosenData == "Population Data") {
+                legend.addTo(map);
                 this._div.innerHTML = '<h4>US Population Data</h4>' +  (props ?
                     '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
                     : 'Hover over a state');
             }
             else if (chosenData == "Election Data") {
+                map.removeControl(legend);
                 if (chosenElection == "2016 Presidential Election") {
                     this._div.innerHTML = '<h4>US 2016 Presidential Election Data</h4>' +  (props ?
                         '<b>' + props.name + '</b><br />' + props.election_pres[0] + '% Democrat' +
@@ -873,12 +923,14 @@
             }
         }
         if(congressToggle){
+            legend.addTo(map);
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.NAME + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
                 + '<h5><i>Source: US Census</i>' //dummy data to remove
                 : 'Hover over a congressional district');
         }
         if(countyToggle){
+            legend.addTo(map);
             this._div.innerHTML = '<h4>Census Area</h4>' +  (props ?
                 '<b>' + props.NAME + '</b><br />' + props.CENSUSAREA + ' people / mi<sup>2</sup>'
                 + '<h5><i>Source: US Census</i>' //dummy data to remove
@@ -892,12 +944,14 @@
         /* TODO: Add in the other races */
         if(marylandToggle){
             if(chosenData == "Population Data") {
+                legend.addTo(map);
                 this._div.innerHTML = '<h4>Population Data</h4>' +  (props ?
                     '<b>' + props.NAME + '</b><br />' + props.ADJ_POP + ' people / mi<sup>2</sup>'
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
                     : 'Hover over a state');
             }
             if(chosenData == "Demographic Data") {
+                map.removeControl(legend);
                 this._div.innerHTML = '<h4>Demographics</h4>' + (props ?
                     '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POP) * 100) + '%' +
                     '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POP) * 100) + '%' +
@@ -906,10 +960,11 @@
                     : 'Hover over a precinct');
             }
             if(chosenData == "Election Data") {
+                map.removeControl(legend);
                 this._div.innerHTML = '<h4>Elections</h4>' + (props ?
-                    '<b>' + props.NAME + '</b><br />' + 'number democrat: ' + props.USH16D +
-                    '</b><br />' + 'number republican: ' + props.USH16R
-                    + '<h5><i>Source: US Census</i>' //dummy data to remove
+                    '<b>' + props.NAME + '</b><br />' + 'Democrat Percent: ' + (((props.USH16D)/(props.USH16D + props.USH16R))*100) +
+                    '%' + '</b><br />' + 'Republican Percent: ' + (((props.USH16R)/(props.USH16D + props.USH16R))*100) + '%'
+                    + '<h5><i>Source: US Census</i>'
                     : 'Hover over a precinct');
             }
         }
@@ -928,24 +983,44 @@
             labels = [];
 
         if(statesToggle){
-            grades = [0, 10, 20, 50, 100, 200, 500, 1000];
+            grades = [0, 300, 400, 500];
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + statePopColor((grades[i] + 1)) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
         }
-        /* TODO: Can't get the grades to change for some reason */
         if(congressToggle){
-            grades = [0, 5000, 10000, 15000, 25000, 50000, 75000, 100000];
+            grades = [0, 1000, 2000, 3000, 4000, 5000, 10000, 20000];
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + congressPopColor((grades[i] + 1)) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
+        }
+
+        if(countyToggle){
+            grades = [0, 1000, 2000, 3000, 4000, 5000, 10000, 20000];
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + congressPopColor((grades[i] + 1)) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
+        }
+
+        if(marylandToggle){
+            grades = [0, 1000, 2000, 3000, 4000, 5000, 10000, 20000];
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + marylandPopColor((grades[i] + 1)) + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            }
         }
 
         // loop through our density intervals and generate a label with a colored square for each interval
-        for (var i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + getPopulationColor((grades[i] + 1),1000) + '"></i> ' +
-                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-        }
 
         return div;
     };
-
-    legend.addTo(map);
 
     function changeStateView() {
         var e = document.getElementById("state_change");
