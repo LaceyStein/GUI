@@ -90,7 +90,7 @@
                                     <option selected disabled value="0">Choose correction</option>
                                     <option value="1" >Fix self-intersecting precincts</option>
                                     <option value="2">Fix open borders</option>
-                                    <option value="3" >Fix overlapping precincts</option>
+                                    <option value="3" >Fix enclosed precincts</option>
                                     <option value="4" >Fix gaps in precincts</option>
                                 </select>
                             </div>
@@ -519,6 +519,26 @@
             fillOpacity: 0.7
         };
     }
+    function marylandPres16(feature) {
+        return {
+            fillColor: getElectionColor(((feature.properties.PRES16D)/(feature.properties.PRES16D + feature.properties.PRES16R))*100),
+            weight: 2,
+            opacity: 0.7,
+            color: 'white',
+            dashArray: '1',
+            fillOpacity: 0.7
+        };
+    }
+    function marylandHouse18(feature) {
+        return {
+            fillColor: getElectionColor(((feature.properties.USH18D)/(feature.properties.USH18D + feature.properties.USH18R))*100),
+            weight: 2,
+            opacity: 0.7,
+            color: 'white',
+            dashArray: '1',
+            fillOpacity: 0.7
+        };
+    }
 
     /* THIS WAS CAUSING ISSUES WITH THE POPULATION LAYER NEVER GOING AWAY*/
     /* Add the style to the map. */
@@ -632,7 +652,7 @@
         }
         else {
             alert((document.getElementById('AddPrecinctNameOne').innerHTML).replace("<b>First Precinct Selected: </b>", "") + " and " +
-                (document.getElementById('AddPrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were combined");
+                (document.getElementById('AddPrecinctNameTwo').innerHTML).replace("<b>Second Precinct Selected: </b>", "") + " were made into neighbors");
             document.getElementById('AddPrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
             document.getElementById('AddPrecinctNameTwo').innerHTML = "<b>Second Precinct Selected: </b>None";
             document.getElementById('CombinePrecinctNameOne').innerHTML = "<b>First Precinct Selected: </b>None";
@@ -720,13 +740,30 @@
                         onEachFeature: onEachFeature
                     }).addTo(statesLayers);
                 }
+                if(marylandToggle){
+                    marylandLayers.removeLayer(marylandJson);
+                    marylandJson = L.geoJson(marylandData, {
+                        style: marylandHouse18,
+                        onEachFeature: onEachFeature
+                    }).addTo(marylandLayers);
+                }
             }
             else if (chosenElection == "2016 Presidential Election") {
-                statesLayers.removeLayer(statesJson);
-                statesJson = L.geoJson(statesData, {
-                    style: styleElectionPres,
-                    onEachFeature: onEachFeature
-                }).addTo(statesLayers);
+                if(statesToggle) {
+                    statesLayers.removeLayer(statesJson);
+                    statesJson = L.geoJson(statesData, {
+                        style: styleElectionPres,
+                        onEachFeature: onEachFeature
+                    }).addTo(statesLayers);
+                }
+
+                if(marylandToggle){
+                    marylandLayers.removeLayer(marylandJson);
+                    marylandJson = L.geoJson(marylandData, {
+                        style: marylandPres16,
+                        onEachFeature: onEachFeature
+                    }).addTo(marylandLayers);
+                }
             }
         }
         else if(chosenData == "Demographic Data"){
@@ -914,10 +951,10 @@
             }
             else if (chosenData == "Demographic Data") {
                 this._div.innerHTML = '<h4>Demographics</h4>' +  (props ?
-                    '<b>' + props.name + '</b><br />' + 'percent white: ' + props.demo_data[0] + '%' +
-                    '</b><br />' + 'percent hispanic: ' + props.demo_data[1] + '%' +
-                    '</b><br />' + 'percent black: ' + props.demo_data[2] + '%' +
-                    '</b><br />' + 'percent asian: ' + props.demo_data[3] + '%'
+                    '<b>' + props.name + '</b><br />' + 'percent white: ' + props.demo_data[0].toFixed(2) + '%' +
+                    '</b><br />' + 'percent hispanic: ' + props.demo_data[1].toFixed(2) + '%' +
+                    '</b><br />' + 'percent black: ' + props.demo_data[2].toFixed(2) + '%' +
+                    '</b><br />' + 'percent asian: ' + props.demo_data[3].toFixed(2) + '%'
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
                     : 'Hover over a state');
             }
@@ -953,17 +990,17 @@
             if(chosenData == "Demographic Data") {
                 map.removeControl(legend);
                 this._div.innerHTML = '<h4>Demographics</h4>' + (props ?
-                    '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POP) * 100) + '%' +
-                    '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POP) * 100) + '%' +
-                    '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POP) * 100) + '%'
+                    '<b>' + props.NAME + '</b><br />' + 'percent white: ' + ((props.ADJ_WHITE / props.ADJ_POP) * 100).toFixed(2) + '%' +
+                    '</b><br />' + 'percent black: ' + ((props.ADJ_BLACK / props.ADJ_POP) * 100).toFixed(2) + '%' +
+                    '</b><br />' + 'percent asian: ' + ((props.ADJ_ASIAN / props.ADJ_POP) * 100).toFixed(2) + '%'
                     + '<h5><i>Source: US Census</i>' //dummy data to remove
                     : 'Hover over a precinct');
             }
             if(chosenData == "Election Data") {
                 map.removeControl(legend);
-                this._div.innerHTML = '<h4>Elections</h4>' + (props ?
-                    '<b>' + props.NAME + '</b><br />' + 'Democrat Percent: ' + (((props.USH16D)/(props.USH16D + props.USH16R))*100) +
-                    '%' + '</b><br />' + 'Republican Percent: ' + (((props.USH16R)/(props.USH16D + props.USH16R))*100) + '%'
+                this._div.innerHTML = '<h4>Election</h4>' + (props ?
+                    '<b>' + props.NAME + '</b><br />' + 'Democrat Percent: ' + (((props.USH16D)/(props.USH16D + props.USH16R))*100).toFixed(2) +
+                    '%' + '</b><br />' + 'Republican Percent: ' + (((props.USH16R)/(props.USH16D + props.USH16R))*100).toFixed(2) + '%'
                     + '<h5><i>Source: US Census</i>'
                     : 'Hover over a precinct');
             }
@@ -1049,14 +1086,36 @@
         for what kind of error it is and then it would show all markers with that error when you switch it.
         For now for GUI Demo this is fine.
      */
+
+    var markers = new L.FeatureGroup();
+
     function changeCorrection(){
         var e = document.getElementById("correction-list");
         var chosenCorrection = e.options[e.selectedIndex].text;
         console.log(chosenCorrection);
 
-        if(chosenCorrection == "Fix overlapping precincts"){
-            addMarker();
+        if(chosenCorrection == "Fix enclosed precincts") {
+            var markerLocation = new L.LatLng(39.657, -77.575),
+                marker = new L.Marker(markerLocation).on('click', markerClick).addTo(markers);
+            marker.bindTooltip("Enclosed precincts",
+                {
+                    permanent: true,
+                    direction: 'right'
+                });
+
+            marker.addTo(markers);
+            markers.addTo(map);
+            // map.addLayer(marker).on('click', markerClick);
+
         }
+        if(chosenCorrection != "Fix enclosed precincts"){
+            console.log("else");
+            map.removeLayer(markers);
+        }
+    }
+
+    function markerClick(e) {
+        map.flyTo([39.657, -77.575], 10);
     }
 
 </script>

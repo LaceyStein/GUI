@@ -11,6 +11,8 @@ function addPolygon(){
     map.addLayer(polygon);
 }
 
+var markerGroup = L.layerGroup()
+
 function addMarker() {
     var markerLocation = new L.LatLng(39.657, -77.575),
         marker = new L.Marker(markerLocation);
@@ -20,7 +22,12 @@ function addMarker() {
             permanent: true,
             direction: 'right'
         });
-    map.addLayer(marker);
+
+    map.addLayer(marker).on('click', onClick);;
+}
+
+function onClick(e) {
+    map.flyTo([39.657, -77.575], 10);
 }
 
 /* On map click displays string for where you clicked */
